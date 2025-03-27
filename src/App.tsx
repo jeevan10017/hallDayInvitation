@@ -28,7 +28,7 @@ function App() {
     document.querySelectorAll('.background-music').forEach((el) => el.remove());
   
     const iframe = document.createElement('iframe');
-    iframe.src = 'https://www.youtube.com/embed/ryEjuA-S3fs?autoplay=1&loop=1&playlist=ryEjuA-S3fs&mute=1';
+    iframe.src = 'https://www.youtube.com/embed/ryEjuA-S3fs?autoplay=1&loop=1&playlist=ryEjuA-S3fs';
     iframe.style.display = 'none';
     iframe.className = 'background-music';
     iframe.allow = 'autoplay';
@@ -91,6 +91,12 @@ function App() {
   if (showTransition) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-purple-900 text-white flex items-center justify-center">
+  <iframe 
+    src="https://www.youtube.com/embed/HYren7aNypE?autoplay=1&loop=1&playlist=HYren7aNypE"
+    style={{ display: 'none' }}
+    allow="autoplay"
+    title="background-music"
+  />
   {/* <iframe 
     src="https://www.youtube.com/embed/WtiUfL64FTo?autoplay=1&loop=1&playlist=ryEjuA-S3fs"
     style={{ display: 'none' }}
