@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Analytics } from "@vercel/analytics/react";
 import { Wine, Clock, MapPin, PartyPopper, Sparkles, Star } from 'lucide-react';
 import { db } from './firebase';
 import { collection, addDoc, query, onSnapshot, orderBy, Timestamp } from 'firebase/firestore';
@@ -22,24 +23,32 @@ function App() {
 
   useEffect(() => {
     setIsVisible(true);
-    
-    // YouTube iframe setup
+  
+    // Remove existing iframes to prevent duplication
+    document.querySelectorAll('.background-music').forEach((el) => el.remove());
+  
     const iframe = document.createElement('iframe');
     iframe.src = 'https://www.youtube.com/embed/ryEjuA-S3fs?autoplay=1&loop=1&playlist=ryEjuA-S3fs&mute=1';
     iframe.style.display = 'none';
+    iframe.className = 'background-music';
     iframe.allow = 'autoplay';
     iframe.title = 'background-music';
     document.body.appendChild(iframe);
-
+   
     const handleFirstClick = () => {
-      // Unmute and start playback
-      iframe.contentWindow?.postMessage('{"event":"command","func":"unMute","args":""}', '*');
+      const iframe = document.querySelector('iframe');
+      if (iframe) {
+        iframe.src = 'https://www.youtube.com/embed/ryEjuA-S3fs?autoplay=1&loop=1&playlist=ryEjuA-S3fs';
+      }
       document.removeEventListener('click', handleFirstClick);
     };
-
-    document.addEventListener('click', handleFirstClick);
-
     
+    // Run immediately
+    handleFirstClick();
+    
+    // Also listen for the first click (fallback)
+    document.addEventListener('click', handleFirstClick);
+  
     const q = query(collection(db, 'drinkSelections'), orderBy('timestamp', 'desc'));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const drinkData: DrinkAnalytics[] = [];
@@ -52,16 +61,15 @@ function App() {
           timestamp: data.timestamp.toDate().toISOString(),
         });
       });
-      // setAnalytics(drinkData);
     }, (error) => {
-      console.error("Error fetching drink selections:", error);
+      console.error('Error fetching drink selections:', error);
     });
-
+  
     return () => {
       unsubscribe();
-
     };
   }, []);
+  
 
   const handleDrinkSelection = async (drink: string) => {
     setSelectedDrink(drink);
@@ -83,12 +91,12 @@ function App() {
   if (showTransition) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-purple-900 text-white flex items-center justify-center">
-  <iframe 
-    src="https://www.youtube.com/embed/ryEjuA-S3fs?autoplay=1&loop=1&playlist=ryEjuA-S3fs"
+  {/* <iframe 
+    src="https://www.youtube.com/embed/WtiUfL64FTo?autoplay=1&loop=1&playlist=ryEjuA-S3fs"
     style={{ display: 'none' }}
     allow="autoplay"
     title="background-music"
-  />
+  /> */}
         <div className="text-center space-y-8 animate-fade-in">
           <h1 className="text-6xl font-bold animate-glow">See You This Evening! {guestName}</h1>
           {selectedDrink === 'AllOfThese' ? (
@@ -109,6 +117,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-purple-900 text-white relative overflow-hidden">
       {/* Party Light Effects */}
+      <Analytics />
        <iframe 
         src="https://www.youtube.com/embed/ryEjuA-S3fs?autoplay=1&loop=1&playlist=ryEjuA-S3fs&mute=1"
         style={{ display: 'none' }}
