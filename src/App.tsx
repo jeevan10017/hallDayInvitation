@@ -22,69 +22,84 @@ function App() {
   const [isVisible, setIsVisible] = useState(false);
   const [showTransition, setShowTransition] = useState(false);
   const [selectedDrink, setSelectedDrink] = useState<string | null>(null);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+const tracks = ["/Smoking&Drinking.mp3", "/Gingidi.mp3","/deku.mp3"];
   // const [analytics, setAnalytics] = useState<DrinkAnalytics[]>([]);
   // const [audioPlaying, setAudioPlaying] = useState(false);
   // const [audioError, setAudioError] = useState(false);
   // const audioRef = useRef<HTMLAudioElement | null>(null);
   const guestName = window.location.pathname.slice(1);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [audioPlaying, setAudioPlaying] = useState(false);
+  const [userInteracted, setUserInteracted] = useState(false);
 
   useEffect(() => {
     setIsVisible(true);
 
-    // Remove existing iframes to prevent duplication
-    document.querySelectorAll(".background-music").forEach((el) => el.remove());
-
-    const iframe = document.createElement("iframe");
-    iframe.src =
-      "https://www.youtube.com/embed/ryEjuA-S3fs?autoplay=1&loop=1&playlist=ryEjuA-S3fs";
-    iframe.style.display = "none";
-    iframe.className = "background-music";
-    iframe.allow = "autoplay";
-    iframe.title = "background-music";
-    document.body.appendChild(iframe);
-
+    // Audio handling code
     const handleFirstClick = () => {
-      const iframe = document.querySelector("iframe");
-      if (iframe) {
-        iframe.src =
-          "https://www.youtube.com/embed/ryEjuA-S3fs?autoplay=1&loop=1&playlist=ryEjuA-S3fs";
+      if (!userInteracted && audioRef.current) {
+        setUserInteracted(true);
+        audioRef.current.play()
+          .then(() => setAudioPlaying(true))
+          .catch(console.error);
       }
-      document.removeEventListener("click", handleFirstClick);
     };
 
-    // Run immediately
-    handleFirstClick();
+    // General click handler
+    const handleClick = () => {
+      if (userInteracted && audioRef.current) {
+        setAudioPlaying(prev => {
+          if (prev) {
+            audioRef.current!.pause();
+          } else {
+            audioRef.current!.play();
+          }
+          return !prev;
+        });
+      }
+    };
 
-    // Also listen for the first click (fallback)
-    document.addEventListener("click", handleFirstClick);
+    // Try to autoplay immediately
+    if (audioRef.current) {
+      audioRef.current.play()
+        .then(() => {
+          setAudioPlaying(true);
+          setUserInteracted(true);
+        })
+        .catch(() => {
+          // Autoplay blocked, need user interaction
+          document.addEventListener("click", handleFirstClick, { once: true });
+        });
+    }
 
+    document.addEventListener("click", handleClick);
+
+    // Firestore subscription code
     const q = query(
       collection(db, "drinkSelections"),
       orderBy("timestamp", "desc")
     );
-    const unsubscribe = onSnapshot(
-      q,
-      (querySnapshot) => {
-        const drinkData: DrinkAnalytics[] = [];
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          drinkData.push({
-            id: doc.id,
-            name: data.name,
-            drink: data.drink,
-            timestamp: data.timestamp.toDate().toISOString(),
-          });
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const drinkData: DrinkAnalytics[] = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        drinkData.push({
+          id: doc.id,
+          name: data.name,
+          drink: data.drink,
+          timestamp: data.timestamp.toDate().toISOString(),
         });
-      },
-      (error) => {
-        console.error("Error fetching drink selections:", error);
-      }
-    );
+      });
+      // setDrinkAnalytics(drinkData);
+    });
 
     return () => {
       unsubscribe();
+      document.removeEventListener("click", handleClick);
+      document.removeEventListener("click", handleFirstClick);
     };
-  }, []);
+  }, [userInteracted]);
 
   const handleDrinkSelection = async (drink: string) => {
     setSelectedDrink(drink);
@@ -103,23 +118,20 @@ function App() {
   };
 
   
+  
   if (showTransition) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-purple-900 text-white flex items-center justify-center">
-        {/* Local MP3 file player - add your file to the public folder */}
+        
         <audio
-          autoPlay
-          loop
-          src="/Smoking&Drinking.mp3"
-          style={{ display: "none" }}
-          title="background-music"
-        />
-        <iframe
-          src="https://www.youtube.com/embed/HYren7aNypE?autoplay=1&loop=1&playlist=HYren7aNypE"
-          style={{ display: "none" }}
-          allow="autoplay"
-          title="background-music"
-        />
+  key={currentTrackIndex}
+  autoPlay
+  onEnded={() => setCurrentTrackIndex((prev) => (prev + 1) % tracks.length)}
+  src={tracks[currentTrackIndex]}
+  style={{ display: "none" }}
+  title="background-music"
+/>
+        
         <div className="text-center space-y-8 animate-fade-in">
           <div className="animate-pulse text-red-500 font-bold text-xl mb-6">
             ⚠️ WARNING: Smoking and Alcohol consumption are Injurious to Health - it causes iykyk ⚠️
@@ -155,10 +167,11 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-purple-900 text-white relative overflow-hidden">
       {/* Party Light Effects */}
       <Analytics />
-      <iframe
-        src="https://www.youtube.com/embed/ryEjuA-S3fs?autoplay=1&loop=1&playlist=ryEjuA-S3fs&mute=1"
+      <audio
+        ref={audioRef}
+        loop
+        src="/Swagatham.mp3"
         style={{ display: "none" }}
-        allow="autoplay"
         title="background-music"
       />
       <div className="absolute inset-0 overflow-hidden">
@@ -316,6 +329,7 @@ function App() {
             <h3 className="text-3xl font-bold text-purple-400">Chintu</h3>
             <h3 className="text-3xl font-bold text-purple-400">Ekshith</h3>
             <h3 className="text-3xl font-bold text-purple-400">Chandu</h3>
+            <h3 className="text-3xl font-bold text-purple-400">Vishwas</h3>
           </div>
         </div>
 
