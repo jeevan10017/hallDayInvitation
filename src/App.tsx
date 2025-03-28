@@ -23,7 +23,7 @@ function App() {
   const [showTransition, setShowTransition] = useState(false);
   const [selectedDrink, setSelectedDrink] = useState<string | null>(null);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
-const tracks = ["/Smoking&Drinking.mp3", "/Gingidi.mp3","/deku.mp3"];
+  const tracks = ["/Smoking&Drinking.mp3", "/Gingidi.mp3", "/deku.mp3"];
   // const [analytics, setAnalytics] = useState<DrinkAnalytics[]>([]);
   // const [audioPlaying, setAudioPlaying] = useState(false);
   // const [audioError, setAudioError] = useState(false);
@@ -40,7 +40,8 @@ const tracks = ["/Smoking&Drinking.mp3", "/Gingidi.mp3","/deku.mp3"];
     const handleFirstClick = () => {
       if (!userInteracted && audioRef.current) {
         setUserInteracted(true);
-        audioRef.current.play()
+        audioRef.current
+          .play()
           .then(() => setAudioPlaying(true))
           .catch(console.error);
       }
@@ -49,7 +50,7 @@ const tracks = ["/Smoking&Drinking.mp3", "/Gingidi.mp3","/deku.mp3"];
     // General click handler
     const handleClick = () => {
       if (userInteracted && audioRef.current) {
-        setAudioPlaying(prev => {
+        setAudioPlaying((prev) => {
           if (prev) {
             audioRef.current!.pause();
           } else {
@@ -62,7 +63,8 @@ const tracks = ["/Smoking&Drinking.mp3", "/Gingidi.mp3","/deku.mp3"];
 
     // Try to autoplay immediately
     if (audioRef.current) {
-      audioRef.current.play()
+      audioRef.current
+        .play()
         .then(() => {
           setAudioPlaying(true);
           setUserInteracted(true);
@@ -117,31 +119,31 @@ const tracks = ["/Smoking&Drinking.mp3", "/Gingidi.mp3","/deku.mp3"];
     setShowTransition(true);
   };
 
-  
-  
   if (showTransition) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-purple-900 text-white flex items-center justify-center">
-        
         <audio
-  key={currentTrackIndex}
-  autoPlay
-  onEnded={() => setCurrentTrackIndex((prev) => (prev + 1) % tracks.length)}
-  src={tracks[currentTrackIndex]}
-  style={{ display: "none" }}
-  title="background-music"
-/>
-        
+          key={currentTrackIndex}
+          autoPlay
+          onEnded={() =>
+            setCurrentTrackIndex((prev) => (prev + 1) % tracks.length)
+          }
+          src={tracks[currentTrackIndex]}
+          style={{ display: "none" }}
+          title="background-music"
+        />
+
         <div className="text-center space-y-8 animate-fade-in">
           <div className="animate-pulse text-red-500 font-bold text-xl mb-6">
-            ⚠️ WARNING: Smoking and Alcohol consumption are Injurious to Health - it causes iykyk ⚠️
+            ⚠️ WARNING: Smoking and Alcohol consumption are Injurious to Health
+            - it causes iykyk ⚠️
           </div>
           <h1 className="text-6xl font-bold animate-glow">
             See You This Evening! {guestName}
           </h1>
           {selectedDrink === "AllOfThese" ? (
             <p className="text-2xl text-purple-300">
-              Ready to experience the ultimate party mix! 🎉
+              Ready to experience the ultimate party mix! 
             </p>
           ) : (
             <p className="text-2xl text-purple-300">
@@ -157,12 +159,13 @@ const tracks = ["/Smoking&Drinking.mp3", "/Gingidi.mp3","/deku.mp3"];
           <p className="text-xl text-purple-400 mt-8">
             Get ready for an unforgettable night!
           </p>
+          <p className="text-lg  text-purple-400 ">
+            Psst... Mutual friends are welcome to join the fun! 
+          </p>
         </div>
       </div>
     );
   }
-
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-purple-900 text-white relative overflow-hidden">
       {/* Party Light Effects */}
@@ -329,6 +332,7 @@ const tracks = ["/Smoking&Drinking.mp3", "/Gingidi.mp3","/deku.mp3"];
             <h3 className="text-3xl font-bold text-purple-400">Chintu</h3>
             <h3 className="text-3xl font-bold text-purple-400">Ekshith</h3>
             <h3 className="text-3xl font-bold text-purple-400">Chandu</h3>
+            <h3 className="text-3xl font-bold text-purple-400">Abhiram</h3>
             <h3 className="text-3xl font-bold text-purple-400">Vishwas</h3>
           </div>
         </div>
